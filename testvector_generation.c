@@ -92,13 +92,9 @@ uint8_t compute_fir (uint8_t data_in){
 	data_pipeline[0] = data_in - 128;
 
 	output_temp =  (int32_t)data_pipeline[0]*(int32_t)fir_coeffs[0];
-	output_temp += (int32_t)data_pipeline[1]*(int32_t)fir_coeffs[1];
-	output_temp += (int32_t)data_pipeline[2]*(int32_t)fir_coeffs[2];
-	output_temp += (int32_t)data_pipeline[3]*(int32_t)fir_coeffs[3];
-	output_temp += (int32_t)data_pipeline[4]*(int32_t)fir_coeffs[4];
-	output_temp += (int32_t)data_pipeline[5]*(int32_t)fir_coeffs[5];
-	output_temp += (int32_t)data_pipeline[6]*(int32_t)fir_coeffs[6];
-	output_temp += (int32_t)data_pipeline[7]*(int32_t)fir_coeffs[7];
+    for (int tap = 1; tap < N_TAPS; tap++) {
+        output_temp += (int32_t)data_pipeline[tap] * (int32_t)fir_coeffs[tap];
+    }
 
 	output_temp = output_temp >> 7;
 	if (output_temp > 127) output_temp = 127;
@@ -108,13 +104,9 @@ uint8_t compute_fir (uint8_t data_in){
 
     output = (uint8_t)(output_temp + 128);
 
-	data_pipeline[7] = data_pipeline[6];
-	data_pipeline[6] = data_pipeline[5];
-	data_pipeline[5] = data_pipeline[4];
-	data_pipeline[4] = data_pipeline[3];
-	data_pipeline[3] = data_pipeline[2];
-	data_pipeline[2] = data_pipeline[1];
-	data_pipeline[1] = data_pipeline[0];
+    for (int tap = N_TAPS - 1; tap > 0; tap--) {
+        data_pipeline[tap] = data_pipeline[tap - 1];
+    }
 
     return output;
 }
